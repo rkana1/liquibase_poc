@@ -22,14 +22,15 @@ jobs:
       run: |
         wget -O liquibase.tar.gz https://github.com/liquibase/liquibase/releases/download/v4.24.0/liquibase-4.24.0.tar.gz
         tar -xzf liquibase.tar.gz
-        sudo mv liquibase /usr/local/bin/
-        sudo chmod +x /usr/local/bin/liquibase
+        sudo mkdir -p /opt/liquibase
+        sudo mv liquibase/* /opt/liquibase/
+        sudo chmod +x /opt/liquibase/liquibase
+        echo "/opt/liquibase" >> $GITHUB_PATH
         
     - name: Download SQL Server JDBC Driver
       run: |
         wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre11/mssql-jdbc-12.4.2.jre11.jar
-        mkdir -p /tmp/jdbc
-        mv mssql-jdbc-12.4.2.jre11.jar /tmp/jdbc/
+        sudo mv mssql-jdbc-12.4.2.jre11.jar /opt/liquibase/lib/
         
     - name: Run Liquibase Update
       run: |
@@ -37,5 +38,12 @@ jobs:
                   --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master" \
                   --username=${{ secrets.DB_USERNAME }} \
                   --password=${{ secrets.DB_PASSWORD }} \
-                  --classpath=/tmp/jdbc/mssql-jdbc-12.4.2.jre11.jar \
                   update
+                  
+    - name: Generate Liquibase Status Report
+      run: |
+        liquibase --changeLogFile=changelog.yaml \
+                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master" \
+                  --username=${{ secrets.DB_USERNAME }} \
+                  --password=${{ secrets.DB_PASSWORD }} \
+                  status
