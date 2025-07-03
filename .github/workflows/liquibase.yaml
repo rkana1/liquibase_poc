@@ -1,9 +1,7 @@
 name: Run Liquibase Migration
-
 on:
   push:
     branches: [ main, master ]
-
 jobs:
   liquibase:
     runs-on: ubuntu-latest
@@ -11,32 +9,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Set up Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-        
-    - name: Install Liquibase
-      run: |
-        wget -O liquibase.tar.gz https://github.com/liquibase/liquibase/releases/download/v4.24.0/liquibase-4.24.0.tar.gz
-        tar -xzf liquibase.tar.gz
-        sudo mkdir -p /opt/liquibase
-        sudo cp -r lib internal examples licenses liquibase liquibase.bat *.txt /opt/liquibase/
-        sudo chmod +x /opt/liquibase/liquibase
-        echo "/opt/liquibase" >> $GITHUB_PATH
-        
-    - name: Download SQL Server JDBC Driver
-      run: |
-        wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre11/mssql-jdbc-12.4.2.jre11.jar
-        sudo mv mssql-jdbc-12.4.2.jre11.jar /opt/liquibase/lib/
         
     - name: Run Liquibase Update
       run: |
-        liquibase --changeLogFile=changelog.yaml \
-                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
-                  --username=${{ secrets.DB_USERNAME }} \
-                  --password=${{ secrets.DB_PASSWORD }} \
-                  update
-                  
+        docker run --rm \
+          -v ${{ github.workspace }}:/liquibase/changelog \
+          liquibase/liquibase:4.24.0 \
+          --changeLogFile=changelog.yaml \
+          --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
+          --username=${{ secrets.DB_USERNAME }} \
+          --password=${{ secrets.DB_PASSWORD }} \
+          update
