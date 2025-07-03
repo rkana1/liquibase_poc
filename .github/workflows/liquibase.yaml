@@ -2,7 +2,7 @@ name: Run Liquibase Migration
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   liquibase:
@@ -28,7 +28,8 @@ jobs:
     - name: Download SQL Server JDBC Driver
       run: |
         wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre11/mssql-jdbc-12.4.2.jre11.jar
-        sudo mv mssql-jdbc-12.4.2.jre11.jar /usr/local/bin/lib/
+        mkdir -p /tmp/jdbc
+        mv mssql-jdbc-12.4.2.jre11.jar /tmp/jdbc/
         
     - name: Run Liquibase Update
       run: |
@@ -36,5 +37,5 @@ jobs:
                   --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master" \
                   --username=${{ secrets.DB_USERNAME }} \
                   --password=${{ secrets.DB_PASSWORD }} \
-                  --classpath=/usr/local/bin/lib/mssql-jdbc-12.4.2.jre11.jar \
+                  --classpath=/tmp/jdbc/mssql-jdbc-12.4.2.jre11.jar \
                   update
