@@ -35,7 +35,7 @@ jobs:
     - name: Run Liquibase Update
       run: |
         liquibase --changeLogFile=changelog.yaml \
-                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master" \
+                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master;encrypt=true;trustServerCertificate=true" \
                   --username=${{ secrets.DB_USERNAME }} \
                   --password=${{ secrets.DB_PASSWORD }} \
                   update
@@ -43,7 +43,7 @@ jobs:
     - name: Generate Liquibase Status Report
       run: |
         liquibase --changeLogFile=changelog.yaml \
-                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master" \
+                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master;encrypt=true;trustServerCertificate=true" \
                   --username=${{ secrets.DB_USERNAME }} \
                   --password=${{ secrets.DB_PASSWORD }} \
                   status
