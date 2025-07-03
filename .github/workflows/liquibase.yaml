@@ -1,0 +1,40 @@
+name: Run Liquibase Migration
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  liquibase:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Install Liquibase
+      run: |
+        wget -O liquibase.tar.gz https://github.com/liquibase/liquibase/releases/download/v4.24.0/liquibase-4.24.0.tar.gz
+        tar -xzf liquibase.tar.gz
+        sudo mv liquibase /usr/local/bin/
+        sudo chmod +x /usr/local/bin/liquibase
+        
+    - name: Download SQL Server JDBC Driver
+      run: |
+        wget https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre11/mssql-jdbc-12.4.2.jre11.jar
+        sudo mv mssql-jdbc-12.4.2.jre11.jar /usr/local/bin/lib/
+        
+    - name: Run Liquibase Update
+      run: |
+        liquibase --changeLogFile=changelog.yaml \
+                  --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=master" \
+                  --username=${{ secrets.DB_USERNAME }} \
+                  --password=${{ secrets.DB_PASSWORD }} \
+                  --classpath=/usr/local/bin/lib/mssql-jdbc-12.4.2.jre11.jar \
+                  update
