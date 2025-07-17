@@ -22,8 +22,8 @@ jobs:
           --password=${{ secrets.DB_PASSWORD }} \
           update
 
-    - name: Wait for 3 minutes
-      run: sleep 180
+    - name: Wait for a minute
+      run: sleep 60
 
     - name: Run Updated Liquibase Migration
       run: |
@@ -35,3 +35,17 @@ jobs:
           --username=${{ secrets.DB_USERNAME }} \
           --password=${{ secrets.DB_PASSWORD }} \
           update
+
+    - name: Wait for 1 minutes before rollback
+      run: sleep 60
+
+    - name: Rollback Latest Changes
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/liquibase/changelog \
+          liquibase/liquibase:4.24.0 \
+          --changeLogFile=changelog_updated.yaml \
+          --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
+          --username=${{ secrets.DB_USERNAME }} \
+          --password=${{ secrets.DB_PASSWORD }} \
+          rollback-count 1
