@@ -32,3 +32,32 @@ databaseChangeLog:
             columnNames: email
             tableName: users
             constraintName: uq_users_email
+
+  - changeSet:
+      id: insert-sample-users
+      author: manas
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: Sai
+              - column:
+                  name: last_name
+                  value: Manas
+              - column:
+                  name: email
+                  value: manas@gmail.com
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: Sonny
+              - column:
+                  name: last_name
+                  value: Hayes
+              - column:
+                  name: email
+                  value: sonny@gmail.com
