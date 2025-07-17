@@ -2,6 +2,7 @@ name: Run Liquibase Migration
 on:
   push:
     branches: [ main, master ]
+
 jobs:
   liquibase:
     runs-on: ubuntu-latest
@@ -10,12 +11,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
         
-    - name: Run Liquibase Update
+    - name: Run Initial Liquibase Migration
       run: |
         docker run --rm \
           -v ${{ github.workspace }}:/liquibase/changelog \
           liquibase/liquibase:4.24.0 \
           --changeLogFile=changelog.yaml \
+          --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
+          --username=${{ secrets.DB_USERNAME }} \
+          --password=${{ secrets.DB_PASSWORD }} \
+          update
+
+    - name: Wait for 3 minutes
+      run: sleep 180
+
+    - name: Run Updated Liquibase Migration
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/liquibase/changelog \
+          liquibase/liquibase:4.24.0 \
+          --changeLogFile=changelog_updated.yaml \
           --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
           --username=${{ secrets.DB_USERNAME }} \
           --password=${{ secrets.DB_PASSWORD }} \
