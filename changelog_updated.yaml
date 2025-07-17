@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-phone-column
+      author: manas
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: phone
+                  type: nvarchar(20)
+                  constraints:
+                    nullable: true
+      rollback:
+        - dropColumn:
+            tableName: users
+            columnName: phone
