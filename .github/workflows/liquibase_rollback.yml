@@ -1,0 +1,28 @@
+name: Liquibase Rollback
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_count:
+        description: 'Number of changesets to rollback'
+        required: true
+        default: '1'
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+        
+    - name: Rollback Changes
+      run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/liquibase/changelog \
+          liquibase/liquibase:4.24.0 \
+          --changeLogFile=changelog_updated.yaml \
+          --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
+          --username=${{ secrets.DB_USERNAME }} \
+          --password=${{ secrets.DB_PASSWORD }} \
+          rollback-count ${{ github.event.inputs.rollback_count }}
