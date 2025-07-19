@@ -1,17 +1,17 @@
-name: Run Liquibase Migration
+name: Liquibase Deployment
 on:
   push:
     branches: [ main, master ]
 
 jobs:
-  liquibase:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
         
-    - name: Run Initial Liquibase Migration
+    - name: Run Initial Migration
       run: |
         docker run --rm \
           -v ${{ github.workspace }}:/liquibase/changelog \
@@ -22,10 +22,10 @@ jobs:
           --password=${{ secrets.DB_PASSWORD }} \
           update
 
-    - name: Wait for a minute
+    - name: Wait for verification
       run: sleep 60
 
-    - name: Run Updated Liquibase Migration
+    - name: Run Updated Migration
       run: |
         docker run --rm \
           -v ${{ github.workspace }}:/liquibase/changelog \
@@ -35,17 +35,3 @@ jobs:
           --username=${{ secrets.DB_USERNAME }} \
           --password=${{ secrets.DB_PASSWORD }} \
           update
-
-    - name: Wait for 1 minutes before rollback
-      run: sleep 60
-
-    - name: Rollback Latest Changes
-      run: |
-        docker run --rm \
-          -v ${{ github.workspace }}:/liquibase/changelog \
-          liquibase/liquibase:4.24.0 \
-          --changeLogFile=changelog_updated.yaml \
-          --url="jdbc:sqlserver://${{ secrets.DB_URL }}:1433;databaseName=poc;encrypt=true;trustServerCertificate=true" \
-          --username=${{ secrets.DB_USERNAME }} \
-          --password=${{ secrets.DB_PASSWORD }} \
-          rollback-count 1
