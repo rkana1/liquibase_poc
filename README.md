@@ -1,7 +1,7 @@
 # RDS MS SQL Database Deployment Report
 
 ## Overview
-Successfully deployed Microsoft SQL Server on AWS RDS with automated database migration using Liquibase and GitHub Actions.
+Successfully deployed Microsoft SQL Server on AWS RDS with automated database migrations using Liquibase and GitHub Actions.
 
 ## Infrastructure
 - **RDS Instance**: SQL Server Express (db.t3.micro)
